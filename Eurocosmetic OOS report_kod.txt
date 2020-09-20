@@ -1,0 +1,125 @@
+Sub OdzyskajFormuly()
+    Worksheets(1).Range("A6:A10000").Formula = "=J6&L6&O6"
+        MsgBox "Formuly odzyskane. Idz do drugiej zakladki.", vbOKOnly + vbInformation
+End Sub
+Sub UkryjBezWartosci()
+
+    Dim Formula1 As Variant
+    Dim Formula2 As Variant
+    Dim Formula3 As Variant
+    Dim Formula4 As Variant
+    Dim Raport As Worksheet
+    Dim Tabela As Worksheet
+    Dim Result As Worksheet
+    
+    Set Raport = Worksheets("Raport")
+    Set Tabela = Worksheets("Tabela")
+    Set Result = Worksheets("Result")
+    Formula1 = "=IF(G2=0,"""",IFERROR(TEXT(DATE(RIGHT(G2,4),MONTH(DATE(RIGHT(G2,4),1,1)+(MID(G2,2,2)-1)*7-WEEKDAY(DATE(RIGHT(G2,4),1,1),2)),1),""mmmm"")&"" ""&RIGHT(G2,4),G2))"
+    Formula2 = "=IF(ISBLANK(A3),""NO"",SUM(G3:DA3))"
+    Formula3 = "=PlanningView!P5"
+    Formula4 = "=IF(ISBLANK($B3),"""",SUMIF(PlanningView!$A$6:$A$10000,Tabela!$D3&Tabela!$B3&Tabela!$F3,PlanningView!P$6:P$10000))"
+    
+    If MsgBox("Makro trwa okolo 1 min. Chcesz kontynuowac?", vbYesNo + vbQuestion) = vbNo Then Exit Sub
+    If Tabela.Visible = False Then Tabela.Visible = True
+    If Raport.Visible = False Then Raport.Visible = True
+    
+    Result.Rows("2:10000").Delete
+    Raport.Select
+    Raport.Cells.Select
+    Selection.Delete Shift:=xlUp
+    With Tabela
+        .PivotTables("PivotTable1").PivotCache.Refresh
+        .Range("G2:AB2").Formula = Formula3
+        .Range("G3:AB3").Formula = Formula4
+        .Range("G3:AB5000").FillDown
+        .Columns("A:V").Copy
+    End With
+    Raport.Range("A1").Select
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
+        , SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Tabela.Range("A2:F2").Copy
+    Raport.Range("A2:F2").Select
+    Selection.PasteSpecial Paste:=xlPasteFormats, Operation:=xlNone, _
+        SkipBlanks:=False, Transpose:=False
+    Selection.AutoFilter
+    Range("DB3:DB10000").Formula = Formula2
+    Range("DB3").Select
+    
+    Do While ActiveCell.Value <> "NO"
+    If ActiveCell.Value = 0 Then
+    ActiveCell.Rows("1:1").EntireRow.Select
+    Selection.EntireRow.Hidden = True
+    ActiveCell.Offset(0, 105).Range("A1").Select
+    End If
+    ActiveCell.Range("A2").Select
+    Loop
+    
+    Columns("DB:DB").ClearContents
+    Range("A2:V5000").Select
+    Selection.SpecialCells(xlCellTypeVisible).Copy
+    Result.Select
+    Range("A2").Select
+    ActiveSheet.Paste
+    Range("A2:F2").AutoFilter
+    Tabela.Visible = False
+    Raport.Visible = False
+    Result.Range("G1:AB1").Formula = Formula1
+    Result.Columns("A:AB").EntireColumn.AutoFit
+    MsgBox "Z tabeli zostaly usuniete wiersze niezawierajace danych." & vbCrLf & vbCrLf & _
+    "Nieopracowane dane znajduja sie w ukrytej zakladce 'Tabela'.", vbOKOnly + vbInformation
+    End Sub
+Sub Odkryj_Ukryj_Zakladki()
+    If Sheets("Tabela").Visible = False Then Sheets("Tabela").Visible = True Else Sheets("Tabela").Visible = False
+    If Sheets("Raport").Visible = False Then Sheets("Raport").Visible = True Else Sheets("Raport").Visible = False
+End Sub
+Sub OperacjeNaOOS()
+
+    Dim IloscTyg As Integer
+    Dim IloscOOS As Integer
+    Dim Formula1 As Variant
+    Dim Formula2 As Variant
+    IloscTyg = InputBox("Podaj liczbe tygodni z OOS, ponizej ktorej linie maja zostac ukryte.", , "1 tydzien?")
+    IloscOOS = InputBox("Ponizej jakiej ilosc OOS linie maja nie byc uwzgledniane?", , "300cs?")
+    Formula1 = "=COUNTIFS(G3:V3,""<0"")"
+    Formula2 = "=MIN(G3:V3)"
+    
+    If IloscTyg = 0 And IloscOOS = 0 Then Exit Sub
+    ActiveSheet.Range("$A$2:$F$5000").AutoFilter Field:=6, Criteria1:= _
+        "CT I: SNP Max Proj Inv Shortage (-)"
+    Worksheets("Result").Range("AE3:AE5000").Formula = Formula1
+    Worksheets("Result").Range("AF3:AF5000").Formula = Formula2
+    Worksheets("Result").Range("F3").Select
+
+    Do While ActiveCell.Value <> ""
+    If IloscTyg = 0 Then Exit Do
+    If ActiveCell.Value = "CT I: SNP Max Proj Inv Shortage (-)" Then
+    If ActiveCell.Offset(0, 25).Value <= IloscTyg Then
+    ActiveCell.Rows("1:1").EntireRow.Select
+    Selection.EntireRow.Hidden = True
+    ActiveCell.Offset(0, 5).Select
+    End If
+    End If
+    ActiveCell.Range("A2").Select
+    Loop
+
+    Worksheets("Result").Range("F3").Select
+    Do While ActiveCell.Value <> ""
+    If IloscOOS = 0 Then Exit Do
+    If ActiveCell.Value = "CT I: SNP Max Proj Inv Shortage (-)" Then
+    If ActiveCell.Offset(0, 26).Value >= -IloscOOS Then
+    ActiveCell.Rows("1:1").EntireRow.Select
+    Selection.EntireRow.Hidden = True
+    ActiveCell.Offset(0, 5).Select
+    End If
+    End If
+    ActiveCell.Range("A2").Select
+    Loop
+
+    Worksheets("Result").Columns("AE:AF").Delete
+    Worksheets("Result").Range("A1").Select
+    MsgBox ("Dane zostaly odfiltrowane zgodnie z kryteriami")
+
+End Sub

@@ -1,0 +1,86 @@
+    'autor:     Eryk Rzeznicki
+    'data:      17/09/2020
+    'wersja:    1.2
+    
+    Sub FORMULAS()
+    Sheets("PlanningView").Range("A6:A5500").Formula = "=WEEKNUM(TODAY())"
+    Sheets("PlanningView").Range("B6:B5500").Formula = "=IF(U6=0,"""",IF(VALUE(RIGHT(LEFT(U6,3),2))-'HUB & DC'!$V$1>VLOOKUP(S6,Lists!$B$3:$D$8,3,0),""X"",""Y""))"
+    Sheets("PlanningView").Range("C6:C5500").Formula = "=VLOOKUP(Q6,Lists!$B$11:$C$22,2,0)"
+    Sheets("PlanningView").Range("D6:D5500").Formula = "=VALUE(MID(U6,2,2))"
+    Sheets("PlanningView").Range("E6:E5500").Formula = "=VLOOKUP(S6,Lists!$B$2:$D$8,2,0)"
+    Sheets("PlanningView").Range("F6:F5500").Formula = "=IF(V6<='HUB & DC'!$V$2,""X"",""Y"")"
+    Worksheets("HUB & DC").PivotTables("PivotTable2").PivotCache.Refresh
+    Call AktualnyZakres
+    Call Sortowanie
+End Sub
+Sub Sortowanie()
+
+    On Error GoTo errhandler
+    Dim El As PivotItem
+    Dim E2 As Variant
+    Dim HUB_DC As Worksheet
+    Set HUB_DC = Worksheets("HUB & DC")
+    
+    HUB_DC.Select
+    E2 = HUB_DC.Range("V8").Value
+        
+    For Each El In HUB_DC.PivotTables("PivotTable2").PivotFields("Time Period").PivotItems
+        If El = HUB_DC.Range("V8") Then
+            El.Visible = True
+        ElseIf El = HUB_DC.Range("W8") Then
+            El.Visible = True
+        ElseIf El = HUB_DC.Range("X8") Then
+            El.Visible = True
+        ElseIf El = HUB_DC.Range("Y8") Then
+            El.Visible = True
+        ElseIf El = HUB_DC.Range("Z8") Then
+            El.Visible = True
+        ElseIf El = HUB_DC.Range("AA8") Then
+            El.Visible = True
+        ElseIf El = HUB_DC.Range("AB8") Then
+            El.Visible = True
+        ElseIf El = HUB_DC.Range("AC8") Then
+            El.Visible = True
+        ElseIf El = HUB_DC.Range("AD8") Then
+            El.Visible = True
+        ElseIf El = HUB_DC.Range("AE8") Then
+            El.Visible = True
+        ElseIf El = HUB_DC.Range("AF8") Then
+            El.Visible = True
+        ElseIf El = HUB_DC.Range("AG8") Then
+            El.Visible = True
+        Else
+            El.Visible = False
+        End If
+        
+        Next
+        
+    HUB_DC.Range("V8:AG8").ClearContents
+    HUB_DC.PivotTables("PivotTable2").PivotFields("Time Period").AutoSort xlAscending, "Time Period"
+    HUB_DC.Range("A1").Select
+        
+       Exit Sub
+       
+errhandler:
+    HUB_DC.PivotTables("PivotTable2").PivotFields("Time Period").PivotItems(E2).Visible = True
+        If El = HUB_DC.Range("V8") Then
+        El.Visible = True
+        Else
+        El.Visible = False
+        End If
+        Resume Next
+End Sub
+
+Sub AktualnyZakres()
+
+    Dim i As Integer
+    i = Worksheets("Lists").Range("J1").Value
+    
+    Sheets("Lists").Visible = True
+    Sheets("Lists").Select
+    Worksheets("Lists").Cells(i, 12).Select
+    ActiveCell.Range("A1:A12").Copy
+    Worksheets("HUB & DC").Range("V8").PasteSpecial Paste:=xlPasteAll, Operation:=xlNone, SkipBlanks:=False, Transpose:=True
+    Sheets("Lists").Visible = False
+    
+End Sub
