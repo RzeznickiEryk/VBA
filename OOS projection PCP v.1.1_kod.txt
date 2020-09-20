@@ -58,8 +58,7 @@ Sub Sortowanie()
         Next
         
     HUB_DC.Range("V8:AG8").ClearContents
-    HUB_DC.PivotTables("PivotTable2").PivotFields("Time Period").AutoSort _
-        xlAscending, "Time Period"
+    HUB_DC.PivotTables("PivotTable2").PivotFields("Time Period").AutoSort xlAscending, "Time Period"
     HUB_DC.Range("A1").Select
         
        Exit Sub
