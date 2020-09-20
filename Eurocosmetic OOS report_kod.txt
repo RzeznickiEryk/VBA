@@ -36,14 +36,11 @@ Sub UkryjBezWartosci()
         .Columns("A:V").Copy
     End With
     Raport.Range("A1").Select
-    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme, Operation:=xlNone _
-        , SkipBlanks:=False, Transpose:=False
-    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
-        :=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteAllUsingSourceTheme
+    Selection.PasteSpecial Paste:=xlPasteValues
     Tabela.Range("A2:F2").Copy
     Raport.Range("A2:F2").Select
-    Selection.PasteSpecial Paste:=xlPasteFormats, Operation:=xlNone, _
-        SkipBlanks:=False, Transpose:=False
+    Selection.PasteSpecial Paste:=xlPasteFormats
     Selection.AutoFilter
     Range("DB3:DB10000").Formula = Formula2
     Range("DB3").Select
