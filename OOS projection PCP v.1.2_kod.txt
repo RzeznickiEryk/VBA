@@ -80,7 +80,7 @@ Sub AktualnyZakres()
     Sheets("Lists").Select
     Worksheets("Lists").Cells(i, 12).Select
     ActiveCell.Range("A1:A12").Copy
-    Worksheets("HUB & DC").Range("V8").PasteSpecial Paste:=xlPasteAll, Operation:=xlNone, SkipBlanks:=False, Transpose:=True
+    Worksheets("HUB & DC").Range("V8").PasteSpecial Paste:=xlPasteAll, Transpose:=True
     Sheets("Lists").Visible = False
     
 End Sub
